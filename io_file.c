@@ -228,33 +228,33 @@ int ply_write_1(char *fname, double *pt, double *n, double *c, double *f, double
         return -1;
     
     // add obj_info
-    char *obj_info_col_0 = "num_cols ";
-    char *obj_info_row_0 = "num_rows ";
-    char *obj_info_col_1, *obj_info_row_1;
-    if(col < 100)
-        obj_info_col_1 = (char *)malloc(2 * 8);
-    else if(col < 1000)
-        obj_info_col_1 = (char *)malloc(3 * 8);
-    else if(col < 10000)
-        obj_info_col_1 = (char *)malloc(4 * 8);
+    // char *obj_info_col_0 = "num_cols ";
+    // char *obj_info_row_0 = "num_rows ";
+    // char *obj_info_col_1, *obj_info_row_1;
+    // if(col < 100)
+    //     obj_info_col_1 = (char *)malloc(2 * 8);
+    // else if(col < 1000)
+    //     obj_info_col_1 = (char *)malloc(3 * 8);
+    // else if(col < 10000)
+    //     obj_info_col_1 = (char *)malloc(4 * 8);
     
-    if(row < 100)
-        obj_info_row_1 = (char *)malloc(2 * 8);
-    else if(row  < 1000)
-        obj_info_row_1 = (char *)malloc(3 * 8);
-    else if(row < 10000)
-        obj_info_row_1 = (char *)malloc(4 * 8);
-    itoa (col, obj_info_col_1, 10);
-    itoa (row, obj_info_row_1, 10);
+    // if(row < 100)
+    //     obj_info_row_1 = (char *)malloc(2 * 8);
+    // else if(row  < 1000)
+    //     obj_info_row_1 = (char *)malloc(3 * 8);
+    // else if(row < 10000)
+    //     obj_info_row_1 = (char *)malloc(4 * 8);
+    // myitoa (col, obj_info_col_1, 10);
+    // myitoa (row, obj_info_row_1, 10);
     
-    char *obj_info_col = (char *)malloc(strlen(obj_info_col_0) + strlen(obj_info_col_1) + 1);
-    strcpy(obj_info_col, obj_info_col_0);
-    strcat(obj_info_col, obj_info_col_1);
-    char *obj_info_row = (char *)malloc(strlen(obj_info_row_0) + strlen(obj_info_row_1) + 1);
-    strcpy(obj_info_row, obj_info_row_0);
-    strcat(obj_info_row, obj_info_row_1);
-    ply_add_obj_info(ply, obj_info_col);
-    ply_add_obj_info(ply, obj_info_row);
+    // char *obj_info_col = (char *)malloc(strlen(obj_info_col_0) + strlen(obj_info_col_1) + 1);
+    // strcpy(obj_info_col, obj_info_col_0);
+    // strcat(obj_info_col, obj_info_col_1);
+    // char *obj_info_row = (char *)malloc(strlen(obj_info_row_0) + strlen(obj_info_row_1) + 1);
+    // strcpy(obj_info_row, obj_info_row_0);
+    // strcat(obj_info_row, obj_info_row_1);
+    // ply_add_obj_info(ply, obj_info_col);
+    // ply_add_obj_info(ply, obj_info_row);
     
     // add elements and properties
     ply_add_element(ply, "vertex", num_vertices);
@@ -351,7 +351,7 @@ void strreverse(char* begin, char* end) {
         aux=*end, *end--=*begin, *begin++=aux;
 }
 
-void itoa(int value, char* str, int base) {
+void myitoa(int value, char* str, int base) {
     static char num[] = "0123456789abcdefghijklmnopqrstuvwxyz";
     char* wstr=str;
     int sign;

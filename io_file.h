@@ -38,11 +38,11 @@ static int read_list_cb(p_ply_argument argument);
 
 // helper methods
 /**
- * Ansi C "itoa" based on Kernighan & Ritchie's "Ansi C":
+ * Ansi C "myitoa" based on Kernighan & Ritchie's "Ansi C":
  */
 
 void strreverse(char* begin, char* end);
-void itoa(int value, char* str, int base);
+void myitoa(int value, char* str, int base);
 
 
 #endif /* io_file_h */
