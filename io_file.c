@@ -13,7 +13,7 @@ double *normal;
 double *rgb;
 double *face;
 double *grid;
-int type_property[5]; // 1: pt, 2: n, 3: rgb, 4: face, 5: range_grid
+int type_property[5]; // 1: pt, 2: n, 3: rgb(a), 4: face, 5: range_grid
 int ind_property = 0;
 int num_property = 1; // 1: pt, 2: pt and n, or pt and rgb, 3: pt, n, and rgb
 
@@ -48,8 +48,10 @@ p_ply ply_header_read(char *fname, int *num_vertices, int *num_faces, int *num_r
                     type_property[1] = 1;
                 else if(!strcmp(property_name, "red") || !strcmp(property_name, "green") || !strcmp(property_name, "blue"))
                     type_property[2] = 1;
-                else if(!strcmp(property_name, "diffuse_red") || !strcmp(property_name, "diffuse_green") || !strcmp(property_name, "diffuse_blue"))
-                    type_property[2] = 1;
+                else if(!strcmp(property_name, "diffuse_red") || !strcmp(property_name, "diffuse_green") || !strcmp(property_name, "diffuse_blue")) // for PMVS
+                    type_property[2] = -1;
+                else if(!strcmp(property_name, "alpha"))
+                    type_property[2] = 2 * type_property[2];
             }
         }
         else if(!strcmp(element_name, "face") && num_faces != NULL)
@@ -85,31 +87,50 @@ int ply_read_1(char *fname, double *pt, double *n, double *c, double *f, double 
     ply_set_read_cb(ply, "vertex", "z", read_scalar_cb, NULL, 0);
     num_property = 1;
     
-    if(n != NULL && c == NULL && type_property[1])
+    if(n != NULL && type_property[1])
     {
         ply_set_read_cb(ply, "vertex", "nx", read_scalar_cb, NULL, 0);
         ply_set_read_cb(ply, "vertex", "ny", read_scalar_cb, NULL, 0);
         ply_set_read_cb(ply, "vertex", "nz", read_scalar_cb, NULL, 0);
-        num_property = 2;
+        num_property++;
     }
-    else if(n == NULL && c != NULL && type_property[2])
-    {
-        ply_set_read_cb(ply, "vertex", "red", read_scalar_cb, NULL, 0);
-        ply_set_read_cb(ply, "vertex", "green", read_scalar_cb, NULL, 0);
-        ply_set_read_cb(ply, "vertex", "blue", read_scalar_cb, NULL, 0);
 
-        num_property = 2;
-    }
-    else if(n != NULL && c != NULL && type_property[1] && type_property[2])
+    if(c != NULL && type_property[2])
     {
-        ply_set_read_cb(ply, "vertex", "nx", read_scalar_cb, NULL, 0);
-        ply_set_read_cb(ply, "vertex", "ny", read_scalar_cb, NULL, 0);
-        ply_set_read_cb(ply, "vertex", "nz", read_scalar_cb, NULL, 0);
-        ply_set_read_cb(ply, "vertex", "red", read_scalar_cb, NULL, 0);
-        ply_set_read_cb(ply, "vertex", "green", read_scalar_cb, NULL, 0);
-        ply_set_read_cb(ply, "vertex", "blue", read_scalar_cb, NULL, 0);
-        num_property = 3;
+        if(type_property[2] > 0)
+        {
+            ply_set_read_cb(ply, "vertex", "red", read_scalar_cb, NULL, 0);
+            ply_set_read_cb(ply, "vertex", "green", read_scalar_cb, NULL, 0);
+            ply_set_read_cb(ply, "vertex", "blue", read_scalar_cb, NULL, 0);
+
+            if(type_property[2] == 2)
+                ply_set_read_cb(ply, "vertex", "alpha", read_scalar_cb, NULL, 0);
+        }
+        else
+        {
+            ply_set_read_cb(ply, "vertex", "diffuse_red", read_scalar_cb, NULL, 0);
+            ply_set_read_cb(ply, "vertex", "diffuse_green", read_scalar_cb, NULL, 0);
+            ply_set_read_cb(ply, "vertex", "diffuse_blue", read_scalar_cb, NULL, 0);
+
+            if(type_property[2] == -2)
+                ply_set_read_cb(ply, "vertex", "alpha", read_scalar_cb, NULL, 0);
+        }
+
+        num_property++;
     }
+    // else if(n != NULL && c != NULL && type_property[1] && type_property[2])
+    // {
+    //     ply_set_read_cb(ply, "vertex", "nx", read_scalar_cb, NULL, 0);
+    //     ply_set_read_cb(ply, "vertex", "ny", read_scalar_cb, NULL, 0);
+    //     ply_set_read_cb(ply, "vertex", "nz", read_scalar_cb, NULL, 0);
+    //     ply_set_read_cb(ply, "vertex", "red", read_scalar_cb, NULL, 0);
+    //     ply_set_read_cb(ply, "vertex", "green", read_scalar_cb, NULL, 0);
+    //     ply_set_read_cb(ply, "vertex", "blue", read_scalar_cb, NULL, 0);
+    //     // if(type_property[2] == 2)
+    //     //     ply_set_read_cb(ply, "vertex", "alpha", read_scalar_cb, NULL, 0);
+
+    //     num_property = 3;
+    // }
     
     if(f != NULL && type_property[3])
     {
@@ -134,6 +155,9 @@ int read_scalar_cb(p_ply_argument argument)
 {
     double val = ply_get_argument_value(argument);
     int ind_instance = (int)get_argument_instance_index(argument);
+    int DIM_RGB = 3;
+    if(type_property[2] == 2)
+        DIM_RGB = 4;
     
     switch(num_property)
     {
@@ -149,10 +173,10 @@ int read_scalar_cb(p_ply_argument argument)
             else if(normal != NULL && rgb == NULL)
                 normal[DIM * ind_instance + ind_property - DIM] = val;
             else if(rgb != NULL)
-                rgb[DIM * ind_instance + ind_property - DIM] = val;
+                rgb[DIM_RGB * ind_instance + ind_property - DIM] = val;
             
             ind_property++;
-            ind_property = ind_property % (2 * DIM);
+            ind_property = ind_property % (DIM + DIM_RGB);
             break;
         case 3:
             if(ind_property < DIM)
@@ -160,10 +184,10 @@ int read_scalar_cb(p_ply_argument argument)
             else if(ind_property < 2 * DIM)
                 normal[DIM * ind_instance + ind_property - DIM] = val;
             else
-                rgb[DIM * ind_instance + ind_property - 2 * DIM] = val;
+                rgb[DIM_RGB * ind_instance + ind_property - 2 * DIM] = val;
             
             ind_property++;
-            ind_property = ind_property % (3 * DIM);
+            ind_property = ind_property % (2 * DIM + DIM_RGB);
             break;
     }
     

@@ -25,7 +25,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     int num_vertices, num_faces, num_grids;
     ply_header_read(fname, &num_vertices, &num_faces, &num_grids);
-    mexPrintf("vertices num: %d\n faces num: %d\n grids num: %d\n", num_vertices, num_faces, num_grids);
+//     mexPrintf("vertices num: %d\n faces num: %d\n grids num: %d\n", num_vertices, num_faces, num_grids);
     
     double *points = NULL, *normals = NULL, *rgbs = NULL;
     double *faces = NULL, *grids = NULL;
@@ -43,17 +43,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         normals = mxGetPr(plhs[1]);
     }
     // rgbs is one of the outputs
-//    if(type_property[2])
-//    {
-//        plhs[2] = mxCreateDoubleMatrix(DIM, num_vertices, mxREAL);
-//        rgbs = mxGetPr(plhs[2]);
-//    }
-    // faces is one of the outputs
-    if(type_property[3]) // create return array for face
+    if(type_property[2] == 1)
     {
-        plhs[2] = mxCreateDoubleMatrix(DIM, num_faces, mxREAL);
-        faces = mxGetPr(plhs[2]);
+        plhs[2] = mxCreateDoubleMatrix(DIM, num_vertices, mxREAL);
+        rgbs = mxGetPr(plhs[2]);
     }
+    else if(type_property[2] == 2)
+    {
+        plhs[2] = mxCreateDoubleMatrix(DIM + 1, num_vertices, mxREAL);
+        rgbs = mxGetPr(plhs[2]);
+    }
+    // faces is one of the outputs
+    // if(type_property[3]) // create return array for face
+    // {
+    //     plhs[2] = mxCreateDoubleMatrix(DIM, num_faces, mxREAL);
+    //     faces = mxGetPr(plhs[2]);
+    // }
     // grids is one of the outputs
 //    if(type_property[4])
 //    {
@@ -62,4 +67,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 //    }
     
     int ret_val = ply_read_1(fname, points, normals, rgbs, faces, grids);
+	
+	
 }
